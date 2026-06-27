@@ -14,6 +14,8 @@ func main() {
 	})
 
 	router.GET("/movies", controllers.GetMovies())
+	router.GET("/movies/:imdb_id", controllers.GetMovie())
+	router.POST("/addmovie ", controllers.AddMovie())
 
 	if err := router.Run(":8080"); err != nil {
 		fmt.Println(err)
