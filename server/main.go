@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pratham27-pro/go_fullstack/server/controllers"
+	"github.com/pratham27-pro/go_fullstack/server/routes"
 )
 
 func main() {
@@ -13,11 +13,8 @@ func main() {
 		c.String(200, "Hello World")
 	})
 
-	router.GET("/movies", controllers.GetMovies())
-	router.GET("/movies/:imdb_id", controllers.GetMovie())
-	router.POST("/addmovie", controllers.AddMovie())
-	router.POST("/register", controllers.RegisterUser())
-	router.POST("/login", controllers.LoginUser())
+	routes.SetupUnprotectedRoutes(router)
+	routes.SetupProtectedRoutes(router)
 
 	if err := router.Run(":8080"); err != nil {
 		fmt.Println(err)
