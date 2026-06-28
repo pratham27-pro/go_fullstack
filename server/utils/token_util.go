@@ -4,7 +4,9 @@ import (
 	"context"
 	"os"
 	"time"
+	"errors"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pratham27-pro/go_fullstack/server/db"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -90,3 +92,39 @@ func UpdateAllTokens(userId string, token, refreshToken string) (err error) {
 	return nil
 }
 
+func GetAccessToken(c *gin.Context) (string, error) {
+	token := c.Request.Header.Get("Authorization")
+	if token == "" {
+		return "", errors.New("Authorization header is required")
+	}
+
+	tokenString := token[len("Bearer: "):]
+
+	if tokenString == "" {
+		return "", errors.New("Bearer token is required")
+	}
+	return tokenString, nil
+}
+
+func ValidateToken(tokenString string) (*SignedDetails, error) {
+	claims := &SignedDetails{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SECRET_KEY), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, err
+	}
+
+	if claims.ExpiresAt.Time.Before(time.Now()) {
+		return nil, errors.New("token expired")
+	}
+	
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return claims, nil
+}
